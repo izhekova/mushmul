@@ -1,0 +1,2 @@
+#!/bin/bash
+nice tail -n 100000 "/var/opt/intershop/eserver2/log/httpd/access-`date +%Y%m%d`-0000.log"|egrep -v "127.0.0.1|::1|^10.47.5.|CloudFront" |cut -d' ' -f1 | sort -n | uniq -c |sort -n |tail -n 40 |awk '{printf("%-10s %s - ",$1 , $2) ; system("geoiplookup \"" $2 "\"")}'
