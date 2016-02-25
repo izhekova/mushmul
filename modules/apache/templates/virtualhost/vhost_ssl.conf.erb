@@ -1,0 +1,94 @@
+# File Managed by Puppet
+# SSL template
+
+<VirtualHost <%= @ip_addr %>:<%= @port %>>
+	DocumentRoot <%= @real_docroot %>
+<% if @server_name_value != false -%>
+	ServerName <%= @server_name_value %>
+<% end -%>
+<% if @serveraliases != "" -%>
+<% if @serveraliases.is_a? Array -%>
+	ServerAlias <%= @serveraliases.flatten.join(" ") %>
+<% else -%>
+	ServerAlias <%= @serveraliases %>
+<% end -%>
+<% end -%>
+<% if @env_variables != "" -%>
+<% if @env_variables.is_a? Array -%>
+<% @env_variables.each do |envvars| -%>
+	SetEnv <%= envvars %>
+<% end -%>
+<% end -%>
+<% end -%>
+<% if @config_name != '' -%>
+	ErrorLog  <%= scope.lookupvar('apache::log_dir') %>/<%= @config_name %>_error_log
+	CustomLog <%= scope.lookupvar('apache::log_dir') %>/<%= @config_name %>_access_log common
+<% else -%>
+	ErrorLog  <%= scope.lookupvar('apache::log_dir') %>/<%= @name %>_error_log
+	CustomLog <%= scope.lookupvar('apache::log_dir') %>/<%= @name %>_access_log common
+<% end -%> 
+<% if @directory_options != "" || @directory_allow_override != "None" || @directory_require != "" -%>
+	<Directory <%= @real_directory %>>
+<% if @directory_options != "" -%>
+		Options <%= @directory_options %>
+<% end -%>
+<% if @directory_allow_override != "None" -%>
+		AllowOverride <%= @directory_allow_override %>
+<% end -%>
+<% if @directory_require != "" -%>
+		Require <%= @directory_require %>
+<% end -%>
+ 	</Directory>
+<% end -%>
+<% if @aliases != "" -%>
+<% if @aliases.is_a? Array -%>
+<% @aliases.each do |singlealias| %>
+	Alias <%= singlealias %>
+<% end -%>
+<% else -%>
+	Alias <%= @aliases %>
+<% end -%>
+<% end -%>
+	ErrorLog /var/log/httpd/ssl_error_log
+	TransferLog /var/log/httpd/ssl_access_log
+	LogLevel warn
+	
+	SSLEngine on
+	SSLHonorCipherOrder on
+	SSLCipherSuite AES256-SHA256:AES128-SHA256:AES256-SHA:AES128-SHA:DES-CBC3-SHA:!aNULL:!MD5:!DSS
+<% if @ssl_crt != '' -%>	
+	SSLCertificateFile <%= @ssl_dir %>/<%= @ssl_cert -%> 
+<% end -%>
+<% if @ssl_key != '' -%>	
+	SSLCertificateKeyFile <%= @ssl_dir %>/<%= @ssl_key -%>
+<% end -%>	
+	SSLCertificateChainFile /etc/httpd/conf/ssl/CA_bundle.crt
+	SSLOptions +StdEnvVars +ExportCertData 
+	SSLProtocol -ALL +TLSv1
+	RewriteEngine on
+	RewriteOptions Inherit 
+
+	<Files ~ "\.(cgi|shtml|phtml|php3?)$">
+		SSLOptions +StdEnvVars 
+	</Files>
+	<Directory "/var/www/cgi-bin">
+		SSLOptions +StdEnvVars
+	</Directory>
+	SetEnvIf User-Agent ".*MSIE.*" \
+		nokeepalive ssl-unclean-shutdown \
+		downgrade-1.0 force-response-1.0
+
+	CustomLog /var/log/httpd/ssl_request_log \
+		"%t %h %{SSL_PROTOCOL}x %{SSL_CIPHER}x \"%r\" %b"
+
+	<Directory "/var/tomcat/webapps/">
+			Options Indexes FollowSymLinks
+	</Directory>
+
+<% if @include_jk == 'Yes' -%>
+	Include <%= @config_file_jk %>
+<% end -%>
+<% if @rewrite_rules != '' -%>
+	Include <%= @rewrite_rules_dir %>/<%= @rewrite_rules %>
+<% end -%>
+</VirtualHost>

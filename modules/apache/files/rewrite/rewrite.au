@@ -1,0 +1,50 @@
+RewriteEngine On
+
+# RewriteRule ^/$    /Homepage.action   [NC,QSA,R=301]
+RewriteLogLevel 2
+RewriteLog /var/log/httpd/rewrite.com.au.log
+
+rewritecond %{REQUEST_METHOD} !^(GET|POST|HEAD)
+RewriteRule .* - [F,L]
+
+rewriteCond %{HTTP_HOST} !^uat\.lakeland\.com\.au
+RewriteCond %{HTTP_HOST} !^uat-stg\.lakeland\.com\.au
+RewriteCond %{HTTP_HOST} !feeds\.uat\.lakeland\.com\.au
+#RewriteCond %{HTTP_HOST} !192.168.208.170
+rewriteCond %{HTTP_HOST} !lakeland.co.uk
+rewriteCond %{HTTP_HOST} !uat-stg.lakeland.co.uk
+
+RewriteRule (.*) http://uat-stg.lakeland.au$1 [R=301]
+# Added by robm 17/04/2012 for server status monitoring
+RewriteCond %{REQUEST_URI} !^/server-status
+
+# Prevents msnbot? from adding to like this review count.
+RewriteCond %{HTTP_USER_AGENT} ^msnbot [OR]
+RewriteCond %{HTTP_USER_AGENT} ^Mozilla/5\.0\ \(compatible;\ bingbot [OR]
+RewriteCond %{HTTP_USER_AGENT} ^TwengaBot [OR]
+RewriteCond %{HTTP_USER_AGENT} ^Mozilla/5\.0\ \(compatible;\ MJ12bot [OR]
+RewriteCond %{HTTP_USER_AGENT} ^ShopWiki [OR]
+RewriteCond %{HTTP_USER_AGENT} ^Mozilla/5\.0\ \(compatible;\ Googlebot
+RewriteCond %{QUERY_STRING} productId=(\w+)&reviewId=(\d+)
+RewriteRule  ^/MarkReviewAsHelpful.action|/MarkReviewAsHelpfulFromAllReviewsPage.action /ProductDetail.action?productId=%1 [R=301,L]
+
+
+RewriteRule ^.productcockpit.$ - [NC,F,L]
+RewriteRule ^.virtualjdbc.$ - [NC,F,L]
+RewriteRule ^.hmc/hybris.$ - [NC,F,L]
+RewriteCond %{HTTP_USER_AGENT} (AESpider) [NC,OR]
+RewriteCond %{HTTP_USER_AGENT} (googlebot) [NC,OR]
+RewriteCond %{HTTP_USER_AGENT} (MSNBot) [NC]
+RewriteRule ^([^;]+);jsessionid=[A-Za-z0-9\-\+\*]+\.[A-Za-z0-9]+(.*)$ $1$2 [L,R=301]
+
+# Top categories settings
+RewriteRule ^/in-the-kitchen$ /1/in-the-kitchen [PT,QSA,L]
+RewriteRule ^/in-the-kitchen/c03.r16.1$ /1/in-the-kitchen [PT,QSA,L]
+RewriteRule ^/around-the-home$ /1/around-the-home [PT,QSA,L]
+RewriteRule ^/around-the-home/c03.r16.1$ /1/around-the-home [PT,QSA,L]
+RewriteRule ^/Christmas$ /1/Christmas [PT,QSA,L]
+RewriteRule ^/Christmas/c01.r16.1$ /1/Christmas [PT,QSA,L]
+RewriteRule ^/outdoor-living$ /1/outdoor-living [PT,QSA,L]
+RewriteRule ^/outdoor-living/c03.r16.1$ /1/outdoor-living [PT,QSA,L]
+RewriteRule ^/sale$ /1/sale [PT,QSA,L]
+

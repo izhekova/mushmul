@@ -1,0 +1,75 @@
+# File Managed by Puppet
+
+<VirtualHost <%= @ip_addr %>:<%= @port %>>
+    DocumentRoot <%= @real_docroot %>
+<% if @server_name_value != false -%>
+    ServerName <%= @server_name_value %>
+<% end -%>
+<% if @serveraliases != "" -%>
+<% if @serveraliases.is_a? Array -%>
+    ServerAlias <%= @serveraliases.flatten.join(" ") %>
+<% else -%>
+    ServerAlias <%= @serveraliases %>
+<% end -%>
+<% end -%>
+<% if @env_variables != "" -%>
+<% if @env_variables.is_a? Array -%>
+<% @env_variables.each do |envvars| -%>
+    SetEnv <%= envvars %>
+<% end -%>
+<% end -%>
+<% end -%>
+<% if @config_name != '' -%>
+    ErrorLog  <%= scope.lookupvar('apache::log_dir') %>/<%= @config_name %>_error_log
+    CustomLog <%= scope.lookupvar('apache::log_dir') %>/<%= @config_name %>_access_log common
+<% else -%>
+    ErrorLog  <%= scope.lookupvar('apache::log_dir') %>/<%= @name %>_error_log
+    CustomLog <%= scope.lookupvar('apache::log_dir') %>/<%= @name %>_access_log common
+<% end -%>    
+<% if @directory_options != "" || @directory_allow_override != "None" || @directory_require != ""  || @directory_order != ''  || @directory_allow != '' -%>
+    <Directory <%= @real_directory %>>
+<% if @directory_options != "" -%>
+        Options <%= @directory_options %>
+<% end -%>
+<% if @directory_allow_override != "None" -%>
+        AllowOverride <%= @directory_allow_override %>
+<% end -%>
+<% if @directory_require != "" -%>
+        Require <%= @directory_require %>
+<% end -%>
+<% if @directory_order != "" -%>
+        Order <%= @directory_order %>
+<% end -%>
+<% if @directory_allow != "" -%>
+        Allow <%= @directory_allow %>
+<% end -%>
+    </Directory>
+<% end -%>
+<% if @aliases != "" -%>
+<% if @aliases.is_a? Array -%>
+<% @aliases.each do |singlealias| %>
+    Alias <%= singlealias %>
+<% end -%>
+<% else -%>
+    Alias <%= @aliases %>
+<% end -%>
+<% end -%>
+<% if @include_jk == 'Yes' -%>
+    Include <%= @config_file_jk %>
+<% end -%>
+<% if @rewrite_rules != '' -%>
+    Include <%= @rewrite_rules_dir %>/<%= @rewrite_rules %>
+<% end -%>
+</VirtualHost>
+<% if @jk_workers_file != '' -%>
+    JkWorkersFile	<%= @jk_workers_file %>
+<% end -%>
+<% if @jk_log_file != '' -%>
+    JkLogFile		<%= @jk_log_file %>
+<% end -%>
+<% if @jk_log_level != '' -%>
+    JkLogLevel		<%= @jk_log_level %>
+<% end -%>
+<% if @jk_log_stamp_format != '' -%>
+    JkLogStampFormat	<%= @jk_log_stamp_format %>
+<% end -%>
