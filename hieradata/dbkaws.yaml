@@ -1,0 +1,2 @@
+---
+profile::zabbix::default::repo_version: 2.4
