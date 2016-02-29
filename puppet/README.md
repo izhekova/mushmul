@@ -1,2 +1,0 @@
-# puppet
-My Puppet repository
